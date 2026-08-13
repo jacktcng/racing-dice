@@ -1,0 +1,1231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Horse Racing — Sky, White & Forest</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+      overflow-x: hidden;
+      background: url('monterey_lumer_chapel.jpg') center / cover fixed no-repeat;
+      position: relative;
+    }
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.10);
+      backdrop-filter: blur(1px);
+      -webkit-backdrop-filter: blur(1px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    body > * {
+      position: relative;
+      z-index: 1;
+    }
+
+    h1, h2, h3, h4, .font-serif {
+      font-family: 'Playfair Display', serif;
+    }
+
+    .horse {
+      transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes diceShake {
+      0% { transform: rotate(0deg) scale(1); }
+      10% { transform: rotate(-12deg) scale(1.04); }
+      20% { transform: rotate(8deg) scale(1.08); }
+      30% { transform: rotate(-16deg) scale(1.04); }
+      40% { transform: rotate(12deg) scale(1.08); }
+      50% { transform: rotate(-8deg) scale(1.04); }
+      60% { transform: rotate(16deg) scale(1.08); }
+      70% { transform: rotate(-12deg) scale(1.04); }
+      80% { transform: rotate(8deg) scale(1.08); }
+      90% { transform: rotate(-4deg) scale(1.04); }
+      100% { transform: rotate(0deg) scale(1); }
+    }
+    .dice-shake {
+      animation: diceShake 0.6s ease-in-out;
+    }
+
+    .podium-1st { height: 120px; background: linear-gradient(180deg, #047857, #065F46); }
+    .podium-2nd { height: 90px; background: linear-gradient(180deg, #E8E8E8, #B0B0B0); }
+    .podium-3rd { height: 60px; background: linear-gradient(180deg, #BAE6FD, #38BDF8); }
+
+    .lane-track {
+      background: repeating-linear-gradient(90deg,
+        rgba(186, 230, 253, 0.45) 0px,
+        rgba(186, 230, 253, 0.45) 40px,
+        rgba(125, 211, 252, 0.35) 40px,
+        rgba(125, 211, 252, 0.35) 80px
+      );
+    }
+    .lane-track:nth-child(even) {
+      background: repeating-linear-gradient(90deg,
+        rgba(167, 243, 208, 0.35) 0px,
+        rgba(167, 243, 208, 0.35) 40px,
+        rgba(110, 231, 183, 0.25) 40px,
+        rgba(110, 231, 183, 0.25) 80px
+      );
+    }
+
+    .finish-line {
+      background: repeating-linear-gradient(
+        135deg,
+        #047857 0px, #047857 8px,
+        #FFFFFF 8px, #FFFFFF 16px
+      );
+    }
+
+    #confetti-canvas {
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    ::-webkit-scrollbar { width: 6px; }
+    ::-webkit-scrollbar-track { background: rgba(0,0,0,0.03); border-radius: 3px; }
+    ::-webkit-scrollbar-thumb { background: rgba(0,0,0,0.1); border-radius: 3px; }
+
+    .screen-enter {
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(12px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .btn-press:active {
+      transform: scale(0.95);
+    }
+
+    .dice-face {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      grid-template-rows: repeat(3, 1fr);
+      gap: 4px;
+      width: 56px;
+      height: 56px;
+      background: white;
+      border-radius: 10px;
+      padding: 8px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .dice-dot {
+      width: 10px;
+      height: 10px;
+      background: #1e293b;
+      border-radius: 50%;
+      justify-self: center;
+      align-self: center;
+    }
+    .dice-dot.empty { background: transparent; }
+
+    .reroll-slot {
+      transition: all 0.3s ease;
+    }
+    .reroll-slot:hover:not(.rerolled) {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 16px rgba(56, 189, 248, 0.35);
+    }
+    .reroll-slot.rerolling {
+      animation: diceShake 0.5s ease-in-out;
+    }
+
+    @media (max-width: 1023px) {
+      .leaderboard-collapsible {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.3s ease;
+      }
+      .leaderboard-collapsible.open {
+        max-height: 500px;
+      }
+    }
+
+    .player-input-row {
+      animation: slideIn 0.2s ease-out;
+    }
+    @keyframes slideIn {
+      from { opacity: 0; transform: translateX(-16px); }
+      to { opacity: 1; transform: translateX(0); }
+    }
+
+    @keyframes bounce {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-10px); }
+    }
+    .crown-bounce {
+      animation: bounce 1s ease-in-out infinite;
+    }
+
+    @keyframes glow {
+      0%, 100% { box-shadow: 0 0 6px rgba(56, 189, 248, 0.2); }
+      50% { box-shadow: 0 0 24px rgba(56, 189, 248, 0.45); }
+    }
+    .active-glow {
+      animation: glow 1.8s ease-in-out infinite;
+    }
+
+    .sky-bg {
+      background: rgba(255, 255, 255, 0.12);
+      backdrop-filter: blur(2px);
+      -webkit-backdrop-filter: blur(2px);
+    }
+
+    .elevated-card {
+      box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 4px 16px rgba(0,0,0,0.06);
+    }
+
+    .avatar-circle {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      object-fit: cover;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+      overflow: hidden;
+    }
+    .avatar-circle img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .horse-unit {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      line-height: 1;
+      gap: 0;
+    }
+    .horse-unit .avatar-on-horse {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      border: 2.5px solid white;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      background: white;
+      margin-bottom: -6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+    }
+    .horse-unit .avatar-on-horse img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .horse-unit .horse-body {
+      font-size: 52px;
+      line-height: 1;
+    }
+
+    .file-input-hidden {
+      position: absolute;
+      width: 0;
+      height: 0;
+      opacity: 0;
+      pointer-events: none;
+    }
+  </style>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            serif: ['Playfair Display', 'serif'],
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+        },
+      },
+    }
+  </script>
+</head>
+<body class="min-h-screen text-stone-800">
+
+  <!-- ==================== REGISTRATION SCREEN ==================== -->
+  <div id="screen-registration" class="min-h-screen flex items-center justify-center p-4 screen-enter">
+    <div class="w-full max-w-xl bg-white/85 backdrop-blur-lg rounded-2xl p-8 elevated-card border border-white/50">
+      <div class="text-center mb-2">
+        <div class="text-5xl mb-2">🏇</div>
+        <h1 class="text-3xl font-bold font-serif text-stone-800">Horse Racing</h1>
+        <p class="text-stone-400 text-sm mt-0.5">Sky Blue · White · Forest Green</p>
+      </div>
+
+      <div class="w-16 h-0.5 bg-gradient-to-r from-sky-400 to-green-600 mx-auto my-4 rounded-full"></div>
+
+      <p class="text-center text-stone-500 text-sm mb-5">Players <span class="text-stone-400">(1–50)</span></p>
+
+      <div id="player-inputs-container" class="space-y-3 mb-4 max-h-[60vh] overflow-y-auto pr-1">
+        <!-- Generated by JS -->
+      </div>
+
+      <div class="flex gap-3">
+        <button id="add-player-btn"
+          class="flex-1 px-4 py-2.5 rounded-xl border border-dashed border-white/40 text-stone-500 hover:border-sky-400 hover:text-sky-600 transition-all text-sm btn-press disabled:opacity-30 disabled:cursor-not-allowed">
+          + Add Player
+        </button>
+        <button id="remove-player-btn"
+          class="px-4 py-2.5 rounded-xl border border-dashed border-rose-300/60 text-rose-400 hover:border-rose-400 hover:text-rose-500 transition-all text-sm btn-press disabled:opacity-30 disabled:cursor-not-allowed">
+          − Remove
+        </button>
+      </div>
+
+      <button id="start-game-btn"
+        class="w-full mt-4 px-6 py-3 rounded-xl font-bold text-lg transition-all btn-press disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-green-600 to-green-800 hover:from-green-500 hover:to-green-700 text-white shadow-lg shadow-green-700/30"
+        disabled>
+        🏁 Start Game
+      </button>
+    </div>
+  </div>
+
+  <!-- ==================== GAME SCREEN ==================== -->
+  <div id="screen-game" class="hidden min-h-screen flex flex-col">
+    <div id="dashboard" class="bg-white/85 backdrop-blur-lg border-b border-white/30 px-4 py-3">
+      <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+        <div class="flex items-center gap-4">
+          <div class="text-sm text-stone-400 font-medium">
+            Round <span id="round-display" class="text-stone-800 font-bold text-lg">1</span> <span class="text-stone-300">/ 5</span>
+          </div>
+          <div class="hidden sm:block w-px h-6 bg-stone-200"></div>
+          <div id="turn-indicator" class="text-sm">
+            <span class="text-stone-400">Turn:</span>
+            <span id="current-player-name" class="font-semibold text-stone-800">—</span>
+          </div>
+        </div>
+
+        <div class="flex items-center gap-4">
+          <div id="dice-display" class="flex items-center gap-3">
+            <div id="dice-container" class="dice-face">
+              <!-- Dots generated by JS -->
+            </div>
+            <span id="dice-result" class="text-2xl font-bold text-green-700 w-8 text-center">?</span>
+          </div>
+          <button id="roll-btn"
+            class="px-6 py-2.5 rounded-xl font-bold text-base transition-all btn-press disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-500 hover:to-sky-700 text-white shadow-lg shadow-sky-800/30">
+            🎲 Roll Die
+          </button>
+        </div>
+
+        <button id="lb-toggle" class="lg:hidden text-stone-400 hover:text-stone-600 transition-colors text-sm">
+          📊 Leaderboard <span id="lb-toggle-arrow">▼</span>
+        </button>
+      </div>
+    </div>
+
+    <div class="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-4 gap-4 overflow-hidden">
+      <div id="racetrack-container" class="flex-1 min-w-0">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-sm font-semibold text-stone-400 uppercase tracking-wider font-sans">🏁 Racetrack</h2>
+        </div>
+        <div id="lanes-container" class="space-y-2">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <div id="leaderboard-container" class="lg:w-72 flex-shrink-0">
+        <div id="leaderboard-header" class="flex items-center justify-between mb-2 cursor-pointer lg:cursor-default">
+          <h2 class="text-sm font-semibold text-stone-400 uppercase tracking-wider font-sans">🏆 Leaderboard</h2>
+          <span class="lg:hidden text-xs text-stone-300">tap to toggle</span>
+        </div>
+        <div id="leaderboard-body" class="leaderboard-collapsible lg:!max-h-none bg-white/85 backdrop-blur-lg rounded-xl p-3 space-y-2 elevated-card border border-white/50">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </div>
+
+    <div id="reroll-panel" class="hidden bg-white/85 backdrop-blur-lg border-b border-white/30 px-4 py-4">
+      <div class="max-w-7xl mx-auto">
+        <div class="flex items-center justify-between mb-3">
+          <div>
+            <h3 class="text-lg font-bold font-serif text-stone-800">🔄 Reroll Phase</h3>
+            <p class="text-sm text-stone-500">Each player may reroll <strong>one</strong> die</p>
+          </div>
+          <div id="reroll-player-indicator" class="text-sm bg-white/85 px-3 py-1.5 rounded-lg font-semibold elevated-card">
+            Player: <span id="reroll-player-name" class="text-sky-700">—</span>
+          </div>
+        </div>
+        <div id="reroll-content" class="space-y-3">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ==================== VICTORY SCREEN ==================== -->
+  <div id="screen-victory" class="hidden fixed inset-0 z-50 flex items-center justify-center p-4">
+    <div class="absolute inset-0 bg-white/25 backdrop-blur-sm"></div>
+    <canvas id="confetti-canvas"></canvas>
+    <div class="relative z-10 w-full max-w-2xl text-center screen-enter">
+      <div class="text-6xl mb-2">👑</div>
+      <h1 class="text-4xl md:text-5xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-green-600 to-green-700 mb-1">
+        Champion!
+      </h1>
+      <p id="winner-name" class="text-xl text-stone-600 mb-8">—</p>
+
+      <div class="w-24 h-0.5 bg-gradient-to-r from-sky-300 via-green-500 to-sky-300 mx-auto mb-8 rounded-full"></div>
+
+      <div id="podium" class="flex items-end justify-center gap-2 md:gap-4 mb-8">
+        <!-- Generated by JS -->
+      </div>
+
+      <div class="max-w-md mx-auto mb-8">
+        <h3 class="text-sm font-semibold text-stone-400 uppercase tracking-wider mb-3 font-sans">🏅 Final Standings</h3>
+        <div id="final-standings" class="bg-white/85 backdrop-blur-lg rounded-xl p-3 space-y-2 elevated-card border border-white/50 text-left">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+
+      <button id="play-again-btn"
+        class="px-8 py-3 rounded-xl font-bold text-lg transition-all btn-press bg-gradient-to-r from-green-600 to-green-800 hover:from-green-500 hover:to-green-700 text-white shadow-lg shadow-green-700/30">
+        🔄 Play Again
+      </button>
+    </div>
+  </div>
+
+  <script>
+    // ================================================================
+    //  CONFIGURATION
+    // ================================================================
+    const MAX_PLAYERS = 50;
+    const MIN_PLAYERS = 1;
+    const TOTAL_ROUNDS = 5;
+    const MAX_SCORE = TOTAL_ROUNDS * 6;
+
+    const RANDOM_AVATARS = [
+      '🐶','🐱','🐼','🦊','🐰','🐻','🦁','🐯','🐸','🐵',
+      '🦄','🐴','🐷','🐮','🐗','🐭','🐹','🐰','🦝','🐨',
+      '🦊','🐻‍❄️','🐲','🦜','🦚','🦋','🐝','🐞','🦑','🐙',
+      '🦈','🐋','🐬','🦭','🐊','🦖','🦕','🐢','🐍','🦎',
+      '🦧','🦍','🐘','🦏','🦛','🐪','🦒','🦘','🐃','🐄',
+    ];
+
+    // ================================================================
+    //  COLOR GENERATOR
+    // ================================================================
+    function generatePlayerColor(index) {
+      const hue = (index * 137.508) % 360;
+      return {
+        hex: `hsl(${hue}, 65%, 42%)`,
+        light: `hsl(${hue}, 55%, 85%)`,
+        pale: `hsl(${hue}, 40%, 93%)`,
+        name: `Color ${index + 1}`,
+      };
+    }
+
+    const DICE_DOTS = {
+      1: [[1,1]],
+      2: [[0,2],[2,0]],
+      3: [[0,2],[1,1],[2,0]],
+      4: [[0,0],[0,2],[2,0],[2,2]],
+      5: [[0,0],[0,2],[1,1],[2,0],[2,2]],
+      6: [[0,0],[0,2],[2,0],[2,2],[1,0],[1,2]],
+    };
+
+    // ================================================================
+    //  STATE
+    // ================================================================
+    const state = {
+      phase: 'registration',
+      players: [],
+      currentRound: 1,
+      currentPlayerIndex: 0,
+      rerollPlayerIndex: 0,
+    };
+
+    // ================================================================
+    //  DOM REFS
+    // ================================================================
+    const $ = (s, p) => (p || document).querySelector(s);
+    const $$ = (s, p) => (p || document).querySelectorAll(s);
+
+    const dom = {};
+
+    function cacheDom() {
+      dom.screenRegistration = $('#screen-registration');
+      dom.screenGame = $('#screen-game');
+      dom.screenVictory = $('#screen-victory');
+      dom.playerInputsContainer = $('#player-inputs-container');
+      dom.addPlayerBtn = $('#add-player-btn');
+      dom.removePlayerBtn = $('#remove-player-btn');
+      dom.startGameBtn = $('#start-game-btn');
+      dom.lanesContainer = $('#lanes-container');
+      dom.leaderboardBody = $('#leaderboard-body');
+      dom.roundDisplay = $('#round-display');
+      dom.currentPlayerName = $('#current-player-name');
+      dom.turnIndicator = $('#turn-indicator');
+      dom.diceContainer = $('#dice-container');
+      dom.diceResult = $('#dice-result');
+      dom.rollBtn = $('#roll-btn');
+      dom.rerollPanel = $('#reroll-panel');
+      dom.rerollContent = $('#reroll-content');
+      dom.rerollPlayerName = $('#reroll-player-name');
+      dom.dashboard = $('#dashboard');
+      dom.lbToggle = $('#lb-toggle');
+      dom.lbToggleArrow = $('#lb-toggle-arrow');
+      dom.lbHeader = $('#leaderboard-header');
+      dom.lbBody = $('#leaderboard-body');
+      dom.confettiCanvas = $('#confetti-canvas');
+      dom.winnerName = $('#winner-name');
+      dom.podium = $('#podium');
+      dom.finalStandings = $('#final-standings');
+      dom.playAgainBtn = $('#play-again-btn');
+    }
+
+    // ================================================================
+    //  HELPERS
+    // ================================================================
+    function rollDie() {
+      return Math.floor(Math.random() * 6) + 1;
+    }
+
+    function diceChar(val) {
+      return ['⚀','⚁','⚂','⚃','⚄','⚅'][val - 1] || '?';
+    }
+
+    function ordinal(n) {
+      if (n === 0) return '—';
+      const s = ['th','st','nd','rd'];
+      const v = n % 100;
+      return n + (s[(v - 20) % 10] || s[v] || s[0]);
+    }
+
+    function getRandomAvatar() {
+      return RANDOM_AVATARS[Math.floor(Math.random() * RANDOM_AVATARS.length)];
+    }
+
+    function getRankedPlayers() {
+      const sorted = [...state.players].sort((a, b) => b.totalScore - a.totalScore);
+      const ranks = [];
+      let currentRank = 1;
+      for (let i = 0; i < sorted.length; i++) {
+        if (i > 0 && sorted[i].totalScore < sorted[i - 1].totalScore) {
+          currentRank = i + 1;
+        }
+        const isTied = i > 0 && sorted[i].totalScore === sorted[i - 1].totalScore;
+        const hasTieBelow = i < sorted.length - 1 && sorted[i].totalScore === sorted[i + 1].totalScore;
+        const showTiePrefix = isTied || hasTieBelow;
+        ranks.push({
+          player: sorted[i],
+          rank: currentRank,
+          rankLabel: showTiePrefix ? `T-${ordinal(currentRank)}` : ordinal(currentRank),
+        });
+      }
+      return ranks;
+    }
+
+    function getPlayerColor(index) {
+      return generatePlayerColor(index);
+    }
+
+    function renderDiceFace(container, value) {
+      container.innerHTML = '';
+      const dots = DICE_DOTS[value] || [];
+      for (let row = 0; row < 3; row++) {
+        for (let col = 0; col < 3; col++) {
+          const dot = document.createElement('div');
+          const isFilled = dots.some(([r, c]) => r === row && c === col);
+          dot.className = 'dice-dot' + (isFilled ? '' : ' empty');
+          container.appendChild(dot);
+        }
+      }
+    }
+
+    function renderAvatar(element, avatar, sizeClass) {
+      if (!avatar || !avatar.value) {
+        element.textContent = '';
+        return;
+      }
+      if (avatar.type === 'emoji') {
+        element.textContent = avatar.value;
+      } else if (avatar.type === 'image') {
+        element.innerHTML = '';
+        const img = document.createElement('img');
+        img.src = avatar.value;
+        img.alt = 'avatar';
+        element.appendChild(img);
+      }
+    }
+
+    function makeAvatarElement(avatar, className) {
+      const el = document.createElement('div');
+      el.className = className;
+      if (!avatar || !avatar.value) return el;
+      if (avatar.type === 'emoji') {
+        el.textContent = avatar.value;
+      } else if (avatar.type === 'image') {
+        const img = document.createElement('img');
+        img.src = avatar.value;
+        img.alt = 'avatar';
+        el.appendChild(img);
+      }
+      return el;
+    }
+
+    // ================================================================
+    //  RENDER FUNCTIONS
+    // ================================================================
+
+    function renderRegistration() {
+      const container = dom.playerInputsContainer;
+      container.innerHTML = '';
+      state.players.forEach((p, i) => {
+        const color = getPlayerColor(i);
+        const row = document.createElement('div');
+        row.className = 'flex items-center gap-2 player-input-row';
+        row.innerHTML = `
+          <div class="w-5 h-5 rounded-full flex-shrink-0 elevated-card" style="background:${color.hex}"></div>
+          <input
+            type="text"
+            data-index="${i}"
+            value="${p.name}"
+            placeholder="Player ${i + 1}"
+            maxlength="20"
+            class="flex-1 min-w-0 bg-white/90 border border-white/40 rounded-lg px-3 py-2 text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all"
+          />
+          <div class="avatar-circle flex-shrink-0 bg-white border border-white/40" id="avatar-preview-${i}">
+            ${p.avatar && p.avatar.type === 'emoji' ? p.avatar.value : ''}
+            ${p.avatar && p.avatar.type === 'image' ? `<img src="${p.avatar.value}" alt="avatar">` : ''}
+          </div>
+          <button class="avatar-upload-btn px-2 py-1.5 text-xs rounded-lg border border-white/40 text-stone-500 hover:border-sky-300 hover:text-sky-600 transition-colors flex-shrink-0" data-index="${i}">
+            📷
+          </button>
+          <input type="file" accept="image/*" class="file-input-hidden avatar-file-input" data-index="${i}" />
+          <button class="avatar-random-btn px-2 py-1.5 text-xs rounded-lg border border-white/40 text-stone-500 hover:border-green-300 hover:text-green-600 transition-colors flex-shrink-0" data-index="${i}">
+            🎲
+          </button>
+        `;
+        container.appendChild(row);
+        const input = row.querySelector('input[type="text"]');
+        input.addEventListener('input', () => {
+          p.name = input.value.trim() || `Player ${i + 1}`;
+          updateStartButton();
+        });
+        const uploadBtn = row.querySelector('.avatar-upload-btn');
+        const fileInput = row.querySelector('.avatar-file-input');
+        uploadBtn.addEventListener('click', () => fileInput.click());
+        fileInput.addEventListener('change', (e) => {
+          const file = e.target.files[0];
+          if (!file) return;
+          const reader = new FileReader();
+          reader.onload = (ev) => {
+            p.avatar = { type: 'image', value: ev.target.result };
+            updateAvatarPreview(i);
+          };
+          reader.readAsDataURL(file);
+        });
+        const randomBtn = row.querySelector('.avatar-random-btn');
+        randomBtn.addEventListener('click', () => {
+          p.avatar = { type: 'emoji', value: getRandomAvatar() };
+          updateAvatarPreview(i);
+        });
+      });
+      updateStartButton();
+      dom.addPlayerBtn.disabled = state.players.length >= MAX_PLAYERS;
+      dom.removePlayerBtn.disabled = state.players.length <= MIN_PLAYERS;
+    }
+
+    function updateAvatarPreview(index) {
+      const preview = document.querySelector(`#avatar-preview-${index}`);
+      if (!preview) return;
+      const p = state.players[index];
+      preview.innerHTML = '';
+      if (!p.avatar) return;
+      if (p.avatar.type === 'emoji') {
+        preview.textContent = p.avatar.value;
+      } else if (p.avatar.type === 'image') {
+        const img = document.createElement('img');
+        img.src = p.avatar.value;
+        img.alt = 'avatar';
+        preview.appendChild(img);
+      }
+    }
+
+    function updateStartButton() {
+      const names = state.players.map(p => p.name.trim()).filter(Boolean);
+      dom.startGameBtn.disabled = names.length < MIN_PLAYERS;
+    }
+
+    function renderLanes() {
+      const container = dom.lanesContainer;
+      container.innerHTML = '';
+      state.players.forEach((p, i) => {
+        const color = getPlayerColor(i);
+        const pct = MAX_SCORE > 0 ? (p.totalScore / MAX_SCORE) * 100 : 0;
+        const isActive = state.phase === 'racing' && i === state.currentPlayerIndex;
+
+        const lane = document.createElement('div');
+        lane.className = 'relative rounded-lg overflow-hidden elevated-card border border-white/40' +
+          (isActive ? ' active-glow' : '');
+        lane.style.background = `linear-gradient(90deg, ${color.pale}ee, white 30%, ${color.pale}99 70%)`;
+
+        lane.innerHTML = `
+          <div class="flex items-stretch h-28 min-h-[112px]">
+            <div class="flex items-center gap-2 px-3 min-w-[110px] sm:min-w-[140px] flex-shrink-0 border-r border-white/30 bg-white/70" style="border-left: 3px solid ${color.hex}">
+              <div class="w-3 h-3 rounded-full flex-shrink-0 elevated-card" style="background:${color.hex}"></div>
+              <span class="text-sm font-semibold text-stone-700 truncate">${p.name}</span>
+            </div>
+            <div class="relative flex-1 lane-track">
+              <div class="horse absolute top-1/2 -translate-y-1/2 z-10 select-none" style="left:${Math.max(1, Math.min(99, pct))}%; transition: left 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);">
+                <div class="horse-unit">
+                  <div class="avatar-on-horse" id="lane-avatar-${i}"></div>
+                  <span class="horse-body">🐎</span>
+                </div>
+              </div>
+              <div class="finish-line absolute right-0 top-0 h-full w-3"></div>
+              <div class="absolute inset-0 flex items-center px-3">
+                <div class="text-xs text-stone-400/60 ml-auto mr-5">${Math.round(pct)}%</div>
+              </div>
+            </div>
+          </div>
+        `;
+        container.appendChild(lane);
+
+        // Render avatar in the horse unit
+        const avatarEl = lane.querySelector(`#lane-avatar-${i}`);
+        if (avatarEl && p.avatar) {
+          if (p.avatar.type === 'emoji') {
+            avatarEl.textContent = p.avatar.value;
+          } else if (p.avatar.type === 'image') {
+            const img = document.createElement('img');
+            img.src = p.avatar.value;
+            img.alt = 'avatar';
+            avatarEl.appendChild(img);
+          }
+        }
+      });
+    }
+
+    function renderLeaderboard() {
+      const body = dom.leaderboardBody;
+      const ranked = getRankedPlayers();
+      body.innerHTML = '';
+      if (ranked.length === 0) {
+        body.innerHTML = '<div class="text-sm text-stone-400 text-center py-4">No players yet</div>';
+        return;
+      }
+      ranked.forEach(({ player, rankLabel }, idx) => {
+        const pi = state.players.indexOf(player);
+        const color = getPlayerColor(pi);
+        const medals = ['🥇','🥈','🥉'];
+        const medal = idx < 3 ? medals[idx] : '';
+        const entry = document.createElement('div');
+        entry.className = 'flex items-center gap-2 py-1.5 px-2 rounded-lg ' +
+          (idx === 0 ? 'bg-sky-50/80 border border-sky-200/60' : 'border border-white/20 bg-white/60');
+        const avatarHtml = player.avatar
+          ? (player.avatar.type === 'emoji'
+              ? `<span class="text-lg">${player.avatar.value}</span>`
+              : `<img src="${player.avatar.value}" alt="" class="w-7 h-7 rounded-full object-cover">`)
+          : '';
+        entry.innerHTML = `
+          <span class="text-xs font-mono w-8 text-stone-400 flex-shrink-0 font-medium">${rankLabel}</span>
+          <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color.hex}"></div>
+          ${avatarHtml}
+          <span class="text-sm flex-1 truncate text-stone-700">${player.name}</span>
+          <span class="text-xs">${medal}</span>
+          <span class="text-sm font-bold text-stone-800">${player.totalScore}</span>
+        `;
+        body.appendChild(entry);
+      });
+    }
+
+    function renderDashboard() {
+      dom.roundDisplay.textContent = state.currentRound;
+      const player = state.players[state.currentPlayerIndex];
+      if (player) {
+        const color = getPlayerColor(state.currentPlayerIndex);
+        dom.currentPlayerName.textContent = player.name;
+        dom.currentPlayerName.style.color = color.hex;
+      } else {
+        dom.currentPlayerName.textContent = '—';
+      }
+      renderDiceFace(dom.diceContainer, 1);
+      dom.diceResult.textContent = '?';
+    }
+
+    function renderRerollPanel() {
+      const container = dom.rerollContent;
+      container.innerHTML = '';
+      const player = state.players[state.rerollPlayerIndex];
+      if (!player) return;
+      dom.rerollPlayerName.textContent = player.name;
+      dom.rerollPlayerName.style.color = getPlayerColor(state.rerollPlayerIndex).hex;
+
+      state.players.forEach((p, pi) => {
+        const color = getPlayerColor(pi);
+        const isCurrent = pi === state.rerollPlayerIndex;
+        const pDiv = document.createElement('div');
+        pDiv.className = 'rounded-xl p-3 border transition-all elevated-card ' +
+          (isCurrent ? 'border-sky-200/60 bg-white/90' : 'border-white/20 bg-white/50 opacity-60');
+        pDiv.innerHTML = `
+          <div class="flex items-center gap-2 mb-2">
+            <div class="w-3 h-3 rounded-full" style="background:${color.hex}"></div>
+            <span class="font-semibold text-sm text-stone-700">${p.name}</span>
+            <span class="text-xs text-stone-400 ml-auto">Total: <strong class="text-stone-800">${p.totalScore}</strong></span>
+          </div>
+          <div class="flex flex-wrap gap-2" data-player="${pi}">
+            ${[0,1,2,3,4].map((ri) => {
+              const val = p.diceValues[ri] || 0;
+              const rerolled = p.rerolledIndex === ri;
+              const canClick = isCurrent && !p.rerollUsed && !rerolled;
+              return `
+                <div class="reroll-slot flex flex-col items-center gap-1 p-2 rounded-lg ${rerolled ? 'rerolled bg-emerald-50/80 border border-emerald-200' : 'bg-white/80 border border-white/30'} ${canClick ? 'cursor-pointer hover:border-sky-300 hover:bg-sky-50/50' : ''}" data-player="${pi}" data-round="${ri}">
+                  <span class="text-lg">${val ? diceChar(val) : '?'}</span>
+                  <span class="text-xs text-stone-400">R${ri + 1}</span>
+                  ${rerolled ? '<span class="text-xs text-emerald-600 font-semibold">✓ Rerolled</span>' : ''}
+                  ${p.rerollUsed && !rerolled ? '<span class="text-xs text-stone-300">—</span>' : ''}
+                </div>
+              `;
+            }).join('')}
+            ${isCurrent && !p.rerollUsed ? '<button class="reroll-skip-btn ml-2 px-3 py-1 text-xs rounded-lg border border-white/30 text-stone-500 hover:text-stone-700 hover:border-white/50 transition-colors self-center">Skip</button>' : ''}
+          </div>
+        `;
+        container.appendChild(pDiv);
+      });
+
+      container.querySelectorAll('.reroll-slot[data-player]').forEach(el => {
+        const pi = parseInt(el.dataset.player);
+        const ri = parseInt(el.dataset.round);
+        const p = state.players[pi];
+        if (pi === state.rerollPlayerIndex && !p.rerollUsed && p.rerolledIndex !== ri) {
+          el.addEventListener('click', () => handleRerollClick(pi, ri));
+        }
+      });
+
+      container.querySelectorAll('.reroll-skip-btn').forEach(btn => {
+        btn.addEventListener('click', () => advanceReroll());
+      });
+    }
+
+    function renderVictory() {
+      const ranked = getRankedPlayers();
+      const winner = ranked[0]?.player;
+      dom.winnerName.textContent = winner ? `${winner.name} — ${winner.totalScore} points` : '';
+      if (winner) {
+        dom.winnerName.style.color = getPlayerColor(state.players.indexOf(winner)).hex;
+      }
+
+      const podium = dom.podium;
+      podium.innerHTML = '';
+      const top3 = ranked.slice(0, 3);
+      const order = top3.length === 3 ? [top3[1], top3[0], top3[2]]
+        : top3.length === 2 ? [top3[1], top3[0]]
+        : top3.length === 1 ? [top3[0]]
+        : [];
+
+      order.forEach(({ player, rankLabel }, i) => {
+        const pi = state.players.indexOf(player);
+        const color = getPlayerColor(pi);
+        const isFirstIn3 = order.length === 3 && i === 1;
+        const crown = isFirstIn3 ? '👑' : '';
+        const medal = i === 0 && order.length === 3 ? '🥈' : isFirstIn3 ? '🥇' : i === 2 ? '🥉' : '';
+        const heightClass = i === 0 && order.length === 3 ? 'podium-2nd'
+          : isFirstIn3 ? 'podium-1st'
+          : i === 2 ? 'podium-3rd'
+          : 'podium-1st';
+        const podiumItem = document.createElement('div');
+        podiumItem.className = 'flex flex-col items-center gap-1';
+        const avatarHtml = player.avatar
+          ? (player.avatar.type === 'emoji'
+              ? `<span class="text-lg">${player.avatar.value}</span>`
+              : `<img src="${player.avatar.value}" alt="" class="w-7 h-7 rounded-full object-cover border border-white/60">`)
+          : '';
+        podiumItem.innerHTML = `
+          ${crown ? `<div class="text-2xl crown-bounce">${crown}</div>` : ''}
+          <div class="w-16 md:w-20 ${heightClass} rounded-t-lg flex items-center justify-center text-xl font-bold text-white/80">
+            ${pi + 1}
+          </div>
+          <div class="flex items-center gap-1 mt-1">
+            <div class="w-2.5 h-2.5 rounded-full" style="background:${color.hex}"></div>
+            ${avatarHtml}
+            <span class="text-xs font-semibold text-stone-700 truncate max-w-[80px]">${player.name}</span>
+          </div>
+          <span class="text-sm font-bold text-stone-800">${player.totalScore}</span>
+          <span class="text-xs text-stone-400">${rankLabel}</span>
+        `;
+        podium.appendChild(podiumItem);
+      });
+
+      const standings = dom.finalStandings;
+      standings.innerHTML = '';
+      ranked.forEach(({ player, rankLabel }, idx) => {
+        const pi = state.players.indexOf(player);
+        const color = getPlayerColor(pi);
+        const medals = ['🥇','🥈','🥉'];
+        const medal = idx < 3 ? medals[idx] : '';
+        const avatarHtml = player.avatar
+          ? (player.avatar.type === 'emoji'
+              ? `<span class="text-lg">${player.avatar.value}</span>`
+              : `<img src="${player.avatar.value}" alt="" class="w-7 h-7 rounded-full object-cover">`)
+          : '';
+        const entry = document.createElement('div');
+        entry.className = 'flex items-center gap-2 py-1.5 px-2 rounded-lg ' +
+          (idx === 0 ? 'bg-sky-50/80 border border-sky-200/60' : 'border border-white/20 bg-white/60');
+        entry.innerHTML = `
+          <span class="text-xs font-mono w-8 text-stone-400 flex-shrink-0 font-medium">${rankLabel}</span>
+          <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color.hex}"></div>
+          ${avatarHtml}
+          <span class="text-sm flex-1 truncate text-stone-700">${player.name}</span>
+          <span class="text-xs">${medal}</span>
+          <span class="text-sm font-bold text-stone-800">${player.totalScore}</span>
+        `;
+        standings.appendChild(entry);
+      });
+
+      startConfetti();
+    }
+
+    // ================================================================
+    //  GAME LOGIC
+    // ================================================================
+
+    function startGame() {
+      const names = state.players.map(p => p.name.trim()).filter(Boolean);
+      if (names.length < MIN_PLAYERS) return;
+
+      state.players.forEach((p, i) => {
+        p.name = names[i] || `Player ${i + 1}`;
+        p.diceValues = [];
+        p.totalScore = 0;
+        p.rerollUsed = false;
+        p.rerolledIndex = -1;
+        p.lane = i;
+      });
+
+      state.phase = 'racing';
+      state.currentRound = 1;
+      state.currentPlayerIndex = 0;
+
+      dom.screenRegistration.classList.add('hidden');
+      dom.screenGame.classList.remove('hidden');
+      dom.screenVictory.classList.add('hidden');
+      dom.rerollPanel.classList.add('hidden');
+      dom.dashboard.classList.remove('hidden');
+
+      renderDashboard();
+      renderLanes();
+      renderLeaderboard();
+      dom.rollBtn.disabled = false;
+    }
+
+    function handleRoll() {
+      if (state.phase !== 'racing') return;
+      const player = state.players[state.currentPlayerIndex];
+      if (!player) return;
+
+      dom.rollBtn.disabled = true;
+
+      const diceContainer = dom.diceContainer;
+      const resultSpan = dom.diceResult;
+      diceContainer.classList.add('dice-shake');
+
+      let cycleCount = 0;
+      const maxCycles = 8 + Math.floor(Math.random() * 4);
+      const interval = setInterval(() => {
+        const v = rollDie();
+        renderDiceFace(diceContainer, v);
+        resultSpan.textContent = v;
+        cycleCount++;
+        if (cycleCount >= maxCycles) {
+          clearInterval(interval);
+          diceContainer.classList.remove('dice-shake');
+          const finalValue = rollDie();
+          renderDiceFace(diceContainer, finalValue);
+          resultSpan.textContent = finalValue;
+          applyRoll(finalValue);
+        }
+      }, 80);
+    }
+
+    function applyRoll(value) {
+      const player = state.players[state.currentPlayerIndex];
+      player.diceValues[state.currentRound - 1] = value;
+      player.totalScore = player.diceValues.reduce((a, b) => a + b, 0);
+
+      renderLanes();
+      renderLeaderboard();
+
+      setTimeout(() => {
+        advanceTurn();
+      }, 900);
+    }
+
+    function advanceTurn() {
+      state.currentPlayerIndex++;
+      if (state.currentPlayerIndex >= state.players.length) {
+        state.currentRound++;
+        state.currentPlayerIndex = 0;
+        if (state.currentRound > TOTAL_ROUNDS) {
+          startRerollPhase();
+          return;
+        }
+      }
+      renderDashboard();
+      renderLanes();
+      dom.rollBtn.disabled = false;
+    }
+
+    function startRerollPhase() {
+      state.phase = 'reroll';
+      state.rerollPlayerIndex = 0;
+      dom.rollBtn.disabled = true;
+      dom.dashboard.classList.add('hidden');
+      dom.rerollPanel.classList.remove('hidden');
+      renderRerollPanel();
+      renderLanes();
+      renderLeaderboard();
+    }
+
+    function handleRerollClick(playerIndex, roundIndex) {
+      const player = state.players[playerIndex];
+      if (!player || player.rerollUsed || player.rerolledIndex === roundIndex) return;
+      if (playerIndex !== state.rerollPlayerIndex) return;
+      if (state.phase !== 'reroll') return;
+
+      player.rerollUsed = true;
+      player.rerolledIndex = roundIndex;
+
+      const slot = dom.rerollContent.querySelector(
+        `.reroll-slot[data-player="${playerIndex}"][data-round="${roundIndex}"]`
+      );
+      if (slot) slot.classList.add('rerolling');
+
+      let cycleCount = 0;
+      const maxCycles = 6 + Math.floor(Math.random() * 3);
+      const interval = setInterval(() => {
+        const v = rollDie();
+        if (slot) {
+          const span = slot.querySelector('span:first-child');
+          if (span) span.textContent = diceChar(v);
+        }
+        cycleCount++;
+        if (cycleCount >= maxCycles) {
+          clearInterval(interval);
+          const finalValue = rollDie();
+          player.diceValues[roundIndex] = finalValue;
+          player.totalScore = player.diceValues.reduce((a, b) => a + b, 0);
+
+          if (slot) {
+            slot.classList.remove('rerolling');
+            slot.classList.add('rerolled');
+            slot.innerHTML = `
+              <span class="text-lg">${diceChar(finalValue)}</span>
+              <span class="text-xs text-stone-400">R${roundIndex + 1}</span>
+              <span class="text-xs text-emerald-600 font-semibold">✓ Rerolled</span>
+            `;
+          }
+
+          renderLanes();
+          renderLeaderboard();
+
+          setTimeout(() => {
+            advanceReroll();
+          }, 800);
+        }
+      }, 100);
+    }
+
+    function advanceReroll() {
+      state.rerollPlayerIndex++;
+      if (state.rerollPlayerIndex >= state.players.length) {
+        endGame();
+        return;
+      }
+      renderRerollPanel();
+      renderLanes();
+      renderLeaderboard();
+    }
+
+    function endGame() {
+      state.phase = 'victory';
+      dom.rerollPanel.classList.add('hidden');
+      dom.screenVictory.classList.remove('hidden');
+      renderVictory();
+      renderLanes();
+      renderLeaderboard();
+    }
+
+    function resetGame() {
+      stopConfetti();
+
+      state.phase = 'registration';
+      state.currentRound = 1;
+      state.currentPlayerIndex = 0;
+      state.rerollPlayerIndex = 0;
+
+      state.players.forEach(p => {
+        p.diceValues = [];
+        p.totalScore = 0;
+        p.rerollUsed = false;
+        p.rerolledIndex = -1;
+      });
+
+      dom.screenVictory.classList.add('hidden');
+      dom.screenGame.classList.add('hidden');
+      dom.screenRegistration.classList.remove('hidden');
+      dom.rerollPanel.classList.add('hidden');
+      dom.dashboard.classList.remove('hidden');
+
+      renderRegistration();
+    }
+
+    // ================================================================
+    //  CONFETTI
+    // ================================================================
+    let confettiAnimId = null;
+    let confettiPieces = [];
+
+    function startConfetti() {
+      const canvas = dom.confettiCanvas;
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      const ctx = canvas.getContext('2d');
+
+      confettiPieces = [];
+      const colors = ['#38BDF8','#7DD3FC','#FFFFFF','#F0F9FF','#047857','#10B981','#065F46','#A7F3D0'];
+      for (let i = 0; i < 180; i++) {
+        confettiPieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          w: Math.random() * 10 + 4,
+          h: Math.random() * 6 + 3,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          vx: (Math.random() - 0.5) * 3,
+          vy: Math.random() * 2.5 + 1.5,
+          rot: Math.random() * 360,
+          rotSpeed: (Math.random() - 0.5) * 8,
+          opacity: Math.random() * 0.4 + 0.4,
+        });
+      }
+
+      function animate() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let active = false;
+        confettiPieces.forEach(p => {
+          p.x += p.vx;
+          p.y += p.vy;
+          p.vy += 0.04;
+          p.rot += p.rotSpeed;
+          if (p.y < canvas.height + 50) {
+            active = true;
+            ctx.save();
+            ctx.globalAlpha = p.opacity;
+            ctx.translate(p.x, p.y);
+            ctx.rotate((p.rot * Math.PI) / 180);
+            ctx.fillStyle = p.color;
+            ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h);
+            ctx.restore();
+          }
+        });
+        if (active) {
+          confettiAnimId = requestAnimationFrame(animate);
+        }
+      }
+      confettiAnimId = requestAnimationFrame(animate);
+
+      window.confettiResize = () => {
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+      };
+      window.addEventListener('resize', window.confettiResize);
+    }
+
+    function stopConfetti() {
+      if (confettiAnimId) {
+        cancelAnimationFrame(confettiAnimId);
+        confettiAnimId = null;
+      }
+      confettiPieces = [];
+      const canvas = dom.confettiCanvas;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      if (window.confettiResize) {
+        window.removeEventListener('resize', window.confettiResize);
+      }
+    }
+
+    // ================================================================
+    //  EVENT BINDING
+    // ================================================================
+
+    function bindEvents() {
+      dom.addPlayerBtn.addEventListener('click', () => {
+        if (state.players.length >= MAX_PLAYERS) return;
+        const idx = state.players.length;
+        const avatar = { type: 'emoji', value: getRandomAvatar() };
+        state.players.push({
+          name: `Player ${idx + 1}`,
+          diceValues: [],
+          totalScore: 0,
+          rerollUsed: false,
+          rerolledIndex: -1,
+          avatar: avatar,
+        });
+        renderRegistration();
+      });
+
+      dom.removePlayerBtn.addEventListener('click', () => {
+        if (state.players.length <= MIN_PLAYERS) return;
+        state.players.pop();
+        renderRegistration();
+      });
+
+      dom.startGameBtn.addEventListener('click', startGame);
+      dom.rollBtn.addEventListener('click', handleRoll);
+
+      dom.lbHeader.addEventListener('click', () => {
+        if (window.innerWidth >= 1024) return;
+        dom.lbBody.classList.toggle('open');
+        dom.lbToggleArrow.textContent = dom.lbBody.classList.contains('open') ? '▲' : '▼';
+      });
+
+      dom.playAgainBtn.addEventListener('click', resetGame);
+
+      document.addEventListener('keydown', (e) => {
+        if (e.target.tagName === 'INPUT') return;
+        if (e.key === ' ' || e.key === 'Enter') {
+          e.preventDefault();
+          if (state.phase === 'racing' && !dom.rollBtn.disabled) {
+            handleRoll();
+          }
+        }
+      });
+    }
+
+    // ================================================================
+    //  INIT
+    // ================================================================
+
+    function init() {
+      cacheDom();
+
+      const defaultAvatar = { type: 'emoji', value: getRandomAvatar() };
+      state.players = [
+        { name: 'Player 1', diceValues: [], totalScore: 0, rerollUsed: false, rerolledIndex: -1, avatar: defaultAvatar },
+      ];
+
+      renderRegistration();
+      bindEvents();
+    }
+
+    document.addEventListener('DOMContentLoaded', init);
+  </script>
+</body>
+</html>
