@@ -230,7 +230,7 @@
           </div>
           <div class="hidden sm:block w-px h-6 bg-white/30"></div>
           <div id="turn-indicator" class="text-sm">
-            <span class="text-stone-400">Turn:</span>
+            <span class="text-stone-400">Your dice:</span>
             <span id="current-player-name" class="font-semibold text-stone-800">—</span>
           </div>
           <div class="hidden md:block text-xs text-stone-400 px-2 py-0.5 rounded-full bg-white/50">Room <span id="room-code-mini">---</span></div>
@@ -278,7 +278,7 @@
             <p class="text-sm text-stone-500">Each player may reroll <strong>one</strong> die</p>
           </div>
           <div id="reroll-player-indicator" class="text-sm bg-white/85 px-3 py-1.5 rounded-lg font-semibold elevated-card">
-            Player: <span id="reroll-player-name" class="text-sky-700">—</span>
+            Status: <span id="reroll-player-name" class="text-sky-700">—</span>
           </div>
         </div>
         <div id="reroll-content" class="space-y-3"></div>
@@ -698,60 +698,66 @@
     function hostRollDie(conn) {
       const s = host.session;
       if (!s || s.phase !== 'racing') return;
-      const player = s.players[s.currentPlayerIndex];
-      if (!player || player.id !== hostSenderId(conn)) return;
+      const pid = hostSenderId(conn);
+      const player = s.players.find((p) => p.id === pid);
+      if (!player) return;
+      if (player.diceValues.length >= TOTAL_ROUNDS) return; // all dice used
+      const pi = s.players.indexOf(player);
       const value = rollDie();
-      player.diceValues[s.currentRound - 1] = value;
+      player.diceValues.push(value);
       player.totalScore = player.diceValues.reduce((a, b) => a + b, 0);
-      broadcastRoll(s.currentPlayerIndex, value);
-      setTimeout(() => hostAdvanceTurn(s), 750);
+      broadcastRoll(pi, value);
+      hostSyncState();
+      checkRacingDone(s);
     }
 
-    function hostAdvanceTurn(s) {
+    function checkRacingDone(s) {
       if (s.phase !== 'racing') return;
-      s.currentPlayerIndex++;
-      if (s.currentPlayerIndex >= s.players.length) {
-        s.currentRound++;
-        s.currentPlayerIndex = 0;
-        if (s.currentRound > TOTAL_ROUNDS) {
-          s.phase = 'reroll';
-          s.rerollPlayerIndex = 0;
-        }
+      if (s.players.every((p) => p.diceValues.length >= TOTAL_ROUNDS)) {
+        s.phase = 'reroll';
+        s.rerollPlayerIndex = 0;
+        hostSyncState();
       }
-      hostSyncState();
     }
 
     function hostReroll(conn, msg) {
       const s = host.session;
       if (!s || s.phase !== 'reroll') return;
-      const player = s.players[s.rerollPlayerIndex];
-      if (!player || player.id !== hostSenderId(conn) || player.rerollUsed) return;
+      const pid = hostSenderId(conn);
+      const player = s.players.find((p) => p.id === pid);
+      if (!player || player.rerollUsed) return;
       const roundIndex = parseInt(msg.roundIndex, 10);
-      if (isNaN(roundIndex) || roundIndex < 0 || roundIndex >= TOTAL_ROUNDS) return;
+      if (isNaN(roundIndex) || roundIndex < 0 || roundIndex >= player.diceValues.length) return;
+      const pi = s.players.indexOf(player);
       player.rerollUsed = true;
       player.rerolledIndex = roundIndex;
       const value = rollDie();
       player.diceValues[roundIndex] = value;
       player.totalScore = player.diceValues.reduce((a, b) => a + b, 0);
-      const payload = { type: 'reroll', playerIndex: s.rerollPlayerIndex, roundIndex, value };
-      for (const [pid, conn] of host.conns) if (conn.open) conn.send(JSON.stringify(payload));
-      animateReroll(s.rerollPlayerIndex, roundIndex, value);
-      setTimeout(() => hostAdvanceReroll(s), 850);
+      const payload = { type: 'reroll', playerIndex: pi, roundIndex, value };
+      for (const [cid, conn] of host.conns) if (conn.open) conn.send(JSON.stringify(payload));
+      animateReroll(pi, roundIndex, value);
+      hostSyncState();
+      checkRerollDone(s);
     }
 
     function hostRerollSkip(conn) {
       const s = host.session;
       if (!s || s.phase !== 'reroll') return;
-      const player = s.players[s.rerollPlayerIndex];
-      if (!player || player.id !== hostSenderId(conn)) return;
-      hostAdvanceReroll(s);
+      const pid = hostSenderId(conn);
+      const player = s.players.find((p) => p.id === pid);
+      if (!player || player.rerollUsed) return;
+      player.rerollUsed = true;
+      hostSyncState();
+      checkRerollDone(s);
     }
 
-    function hostAdvanceReroll(s) {
+    function checkRerollDone(s) {
       if (s.phase !== 'reroll') return;
-      s.rerollPlayerIndex++;
-      if (s.rerollPlayerIndex >= s.players.length) s.phase = 'victory';
-      hostSyncState();
+      if (s.players.every((p) => p.rerollUsed)) {
+        s.phase = 'victory';
+        hostSyncState();
+      }
     }
 
     function hostPlayAgain(conn) {
@@ -793,27 +799,38 @@
       }
     }
 
-    // --- Auto-advance when a disconnected player is up -----------------
+    // --- Auto-roll/skip for disconnected players -------------------
     const turnTimers = new Map();
     function scheduleDisconnectAdvance(session) {
       clearTimeout(turnTimers.get(session));
       if (!session || session.phase === 'lobby' || session.phase === 'victory') return;
+
       let idlePlayer = null;
-      if (session.phase === 'racing') idlePlayer = session.players[session.currentPlayerIndex];
-      else if (session.phase === 'reroll') idlePlayer = session.players[session.rerollPlayerIndex];
+      if (session.phase === 'racing') {
+        idlePlayer = session.players.find(p => !p.connected && p.diceValues.length < TOTAL_ROUNDS);
+      } else if (session.phase === 'reroll') {
+        idlePlayer = session.players.find(p => !p.connected && !p.rerollUsed);
+      }
       if (!idlePlayer) return;
-      if (idlePlayer.connected) return;
+
       const timer = setTimeout(() => {
         turnTimers.delete(session);
-        if (session.phase === 'racing' && !session.players[session.currentPlayerIndex].connected) {
-          const p = session.players[session.currentPlayerIndex];
-          const value = rollDie();
-          p.diceValues[session.currentRound - 1] = value;
-          p.totalScore = p.diceValues.reduce((a, b) => a + b, 0);
-          broadcastRoll(session.currentPlayerIndex, value);
-          setTimeout(() => hostAdvanceTurn(session), 750);
-        } else if (session.phase === 'reroll' && !session.players[session.rerollPlayerIndex].connected) {
-          hostAdvanceReroll(session);
+        if (session.phase === 'racing') {
+          for (const p of session.players) {
+            if (p.connected) continue;
+            while (p.diceValues.length < TOTAL_ROUNDS) {
+              p.diceValues.push(rollDie());
+            }
+            p.totalScore = p.diceValues.reduce((a, b) => a + b, 0);
+          }
+          hostSyncState();
+          checkRacingDone(session);
+        } else if (session.phase === 'reroll') {
+          for (const p of session.players) {
+            if (!p.connected) p.rerollUsed = true;
+          }
+          hostSyncState();
+          checkRerollDone(session);
         }
       }, 10000);
       turnTimers.set(session, timer);
@@ -1067,15 +1084,15 @@
     function renderDashboard() {
       const s = S();
       if (!s) return;
-      dom.roundDisplay.textContent = s.currentRound;
-      const player = s.players[s.currentPlayerIndex];
-      if (player) {
-        const color = getPlayerColor(s.currentPlayerIndex);
-        dom.currentPlayerName.textContent = player.name;
-        dom.currentPlayerName.style.color = color.hex;
-      } else {
-        dom.currentPlayerName.textContent = '—';
-      }
+      const roundsRolled = s.players.length
+        ? Math.min(...s.players.map(p => (p.diceValues || []).length)) + 1
+        : 1;
+      dom.roundDisplay.textContent = Math.min(roundsRolled, TOTAL_ROUNDS);
+      const me = s.players[client.myIndex];
+      const color = getPlayerColor(client.myIndex);
+      const rolled = me ? (me.diceValues || []).length : 0;
+      dom.currentPlayerName.textContent = me ? `${rolled} / ${TOTAL_ROUNDS} dice` : '—';
+      dom.currentPlayerName.style.color = color.hex;
       renderDiceFace(dom.diceContainer, 1);
       dom.diceResult.textContent = '?';
     }
@@ -1088,11 +1105,9 @@
       s.players.forEach((p, i) => {
         const color = getPlayerColor(i);
         const pct = (client.prevPct[i] !== undefined) ? client.prevPct[i] : 0;
-        const isActive = s.phase === 'racing' && i === s.currentPlayerIndex;
 
         const lane = document.createElement('div');
-        lane.className = 'lane relative rounded-lg overflow-hidden elevated-card border border-white/40' +
-          (isActive ? ' active-glow' : '');
+        lane.className = 'lane relative rounded-lg overflow-hidden elevated-card border border-white/40';
         lane.style.background = `linear-gradient(90deg, ${color.pale}ee, white 30%, ${color.pale}99 70%)`;
 
         lane.innerHTML = `
@@ -1168,7 +1183,8 @@
 
     function updateRollButton() {
       const s = S();
-      dom.rollBtn.disabled = !(s && s.phase === 'racing' && client.myIndex === s.currentPlayerIndex);
+      const me = s ? s.players[client.myIndex] : null;
+      dom.rollBtn.disabled = !(s && s.phase === 'racing' && me && me.diceValues.length < TOTAL_ROUNDS);
     }
 
     function renderRerollPanel() {
@@ -1176,29 +1192,26 @@
       const s = S();
       container.innerHTML = '';
       if (!s) return;
-      const current = s.players[s.rerollPlayerIndex];
-      if (current) {
-        dom.rerollPlayerName.textContent = current.name;
-        dom.rerollPlayerName.style.color = getPlayerColor(s.rerollPlayerIndex).hex;
-      }
+      const remaining = s.players.filter(p => !p.rerollUsed).length;
+      dom.rerollPlayerName.textContent = remaining === 0 ? 'All done' : `${remaining} waiting`;
 
       s.players.forEach((p, pi) => {
         const color = getPlayerColor(pi);
-        const isCurrent = pi === s.rerollPlayerIndex && p.id === client.myId;
+        const isMe = p.id === client.myId;
         const pDiv = document.createElement('div');
         pDiv.className = 'rounded-xl p-3 border transition-all elevated-card ' +
-          (pi === s.rerollPlayerIndex ? 'border-sky-200/60 bg-white/90' : 'border-white/20 bg-white/50 opacity-60');
+          (isMe && !p.rerollUsed ? 'border-sky-200/60 bg-white/90' : 'border-white/20 bg-white/50');
         pDiv.innerHTML = `
           <div class="flex items-center gap-2 mb-2">
             <div class="w-3 h-3 rounded-full" style="background:${color.hex}"></div>
-            <span class="font-semibold text-sm text-stone-700">${p.name}</span>
+            <span class="font-semibold text-sm text-stone-700">${p.name}${isMe ? ' <span class="text-xs text-sky-600">(you)</span>' : ''}</span>
             <span class="text-xs text-stone-400 ml-auto">Total: <strong class="text-stone-800">${p.totalScore}</strong></span>
           </div>
           <div class="flex flex-wrap gap-2" data-player="${pi}">
             ${[0,1,2,3,4].map((ri) => {
               const val = p.diceValues[ri] || 0;
               const rerolled = p.rerolledIndex === ri;
-              const canClick = isCurrent && !p.rerollUsed && !rerolled;
+              const canClick = isMe && !p.rerollUsed && !rerolled && !!val;
               return `
                 <div class="reroll-slot flex flex-col items-center gap-1 p-2 rounded-lg ${rerolled ? 'rerolled bg-emerald-50/80 border border-emerald-200' : 'bg-white/80 border border-white/30'} ${canClick ? 'cursor-pointer hover:border-sky-300 hover:bg-sky-50/50' : ''}" data-player="${pi}" data-round="${ri}">
                   <span class="text-lg">${val ? diceChar(val) : '?'}</span>
@@ -1208,7 +1221,7 @@
                 </div>
               `;
             }).join('')}
-            ${isCurrent && !p.rerollUsed ? '<button class="reroll-skip-btn ml-2 px-3 py-1 text-xs rounded-lg border border-white/30 text-stone-500 hover:text-stone-700 hover:border-white/50 transition-colors self-center">Skip</button>' : ''}
+            ${isMe && !p.rerollUsed ? '<button class="reroll-skip-btn ml-2 px-3 py-1 text-xs rounded-lg border border-white/30 text-stone-500 hover:text-stone-700 hover:border-white/50 transition-colors self-center">Skip</button>' : ''}
           </div>
         `;
         container.appendChild(pDiv);
@@ -1218,7 +1231,7 @@
         const pi = parseInt(el.dataset.player);
         const ri = parseInt(el.dataset.round);
         const p = s.players[pi];
-        if (pi === s.rerollPlayerIndex && p.id === client.myId && !p.rerollUsed && p.rerolledIndex !== ri) {
+        if (p.id === client.myId && !p.rerollUsed && p.rerolledIndex !== ri && p.diceValues[ri]) {
           el.addEventListener('click', () => send({ type: 'reroll', roundIndex: ri }));
         }
       });
