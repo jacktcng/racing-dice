@@ -172,7 +172,7 @@
 
       <div id="join-code-wrap" class="hidden mb-3">
         <label class="block text-xs font-semibold text-stone-500 mb-1">Session code</label>
-        <input id="join-code-input" type="text" maxlength="6" placeholder="e.g. AB12CD"
+        <input id="join-code-input" type="text" maxlength="4" placeholder="e.g. 1011"
           class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm tracking-widest uppercase focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all" />
       </div>
 
@@ -504,11 +504,10 @@
     //  once the game starts and re-opens the lobby after the game ends.
     // ================================================================
 
+    const FIXED_CODE = '1011';
+
     function randomCode() {
-      const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
-      let code = '';
-      for (let i = 0; i < 6; i++) code += chars[Math.floor(Math.random() * chars.length)];
-      return code;
+      return FIXED_CODE;
     }
 
     function genPlayerId() {
@@ -556,9 +555,7 @@
     }
 
     // --- Host (session creator) -----------------------------------
-    function hostCreateSession(name, avatar, retries) {
-      retries = retries || 0;
-      if (retries > 6) { setConnStatus(false, 'error'); return; }
+    function hostCreateSession(name, avatar) {
       const code = randomCode();
       const playerId = genPlayerId();
       host.session = {
@@ -589,9 +586,10 @@
       });
       peer.on('connection', (conn) => hostBindConn(conn));
       peer.on('error', (err) => {
+        try { peer.destroy(); } catch {}
         if (err && err.type === 'unavailable-id') {
-          try { peer.destroy(); } catch {}
-          setTimeout(() => hostCreateSession(name, avatar, retries + 1), 150);
+          setConnStatus(false, 'error');
+          showToast('Code ' + code + ' is already in use by another session. Please retry.');
         } else {
           setConnStatus(false, 'error');
         }
@@ -1481,8 +1479,8 @@
         const name = client.profile.name.trim() || 'Player';
         if (client.connectMode === 'join') {
           const code = dom.joinCodeInput.value.trim().toUpperCase();
-          if (code.length < 4) {
-            showToast('Please enter the session code.');
+          if (!/^\d{4}$/.test(code)) {
+            showToast('Please enter the 4-digit session code (1011).');
             return;
           }
           clearSaved();
