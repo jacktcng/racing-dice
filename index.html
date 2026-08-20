@@ -166,19 +166,22 @@
 
       <!-- Mode tabs -->
       <div class="flex rounded-lg bg-white/70 border border-white/40 p-1 mb-3">
-        <button id="tab-create" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">Create Session</button>
-        <button id="tab-join" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">Join Session</button>
+        <button id="tab-player" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">🎮 Player</button>
+        <button id="tab-admin" class="flex-1 py-2 rounded-md text-sm font-semibold transition-all">🔑 Admin</button>
       </div>
 
-      <div id="join-code-wrap" class="hidden mb-3">
-        <label class="block text-xs font-semibold text-stone-500 mb-1">Session code</label>
-        <input id="join-code-input" type="text" maxlength="4" placeholder="e.g. 1011"
-          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm tracking-widest uppercase focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all" />
+      <div id="admin-login-wrap" class="hidden mb-3">
+        <label class="block text-xs font-semibold text-stone-500 mb-1">Admin username</label>
+        <input id="admin-user" type="text" autocomplete="username" placeholder="Enter admin username"
+          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all mb-2" />
+        <label class="block text-xs font-semibold text-stone-500 mb-1">Password</label>
+        <input id="admin-pass" type="password" autocomplete="current-password" placeholder="Enter admin password"
+          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all" />
       </div>
 
       <button id="connect-action-btn"
         class="w-full mt-2 px-6 py-3 rounded-xl font-bold text-lg transition-all btn-press bg-gradient-to-r from-green-600 to-green-800 hover:from-green-500 hover:to-green-700 text-white shadow-lg shadow-green-700/30">
-        Create Session
+        🎮 Join Game
       </button>
 
       <div class="mt-4 text-center text-xs text-stone-400 flex items-center justify-center gap-2">
@@ -349,7 +352,7 @@
       sessionCode: null,
       session: null,    // state mirror (same object as host.session when hosting)
       profile: { name: 'Player', avatar: { type: 'emoji', value: '🐎' } },
-      connectMode: 'create',
+      connectMode: 'player', // 'player' | 'admin'
       prevPct: {},
     };
 
@@ -365,6 +368,10 @@
       { urls: 'stun:stun.l.google.com:19302' },
       { urls: 'stun:global.stun.twilio.com:3478' },
     ] } };
+
+    // Admin credentials for creating the session.
+    const ADMIN_USER = 'jacktcng';
+    const ADMIN_PASS = '199507220413';
 
     // ================================================================
     //  DOM REFS
@@ -382,10 +389,11 @@
       dom.avatarUploadBtn = $('#avatar-upload-btn');
       dom.avatarRandomBtn = $('#avatar-random-btn');
       dom.avatarFileInput = $('#avatar-file-input');
-      dom.tabCreate = $('#tab-create');
-      dom.tabJoin = $('#tab-join');
-      dom.joinCodeWrap = $('#join-code-wrap');
-      dom.joinCodeInput = $('#join-code-input');
+      dom.tabPlayer = $('#tab-player');
+      dom.tabAdmin = $('#tab-admin');
+      dom.adminLoginWrap = $('#admin-login-wrap');
+      dom.adminUser = $('#admin-user');
+      dom.adminPass = $('#admin-pass');
       dom.connectActionBtn = $('#connect-action-btn');
       dom.connStatus = $('#conn-status');
       dom.lobbyCode = $('#lobby-code');
@@ -1028,13 +1036,13 @@
     }
 
     function applyMode() {
-      const join = client.connectMode === 'join';
-      dom.joinCodeWrap.classList.toggle('hidden', !join);
-      dom.connectActionBtn.textContent = join ? 'Join Session' : 'Create Session';
-      dom.tabCreate.className = 'flex-1 py-2 rounded-md text-sm font-semibold transition-all ' +
-        (join ? 'text-stone-400 hover:text-stone-600' : 'bg-white shadow-sm text-stone-800');
-      dom.tabJoin.className = 'flex-1 py-2 rounded-md text-sm font-semibold transition-all ' +
-        (join ? 'bg-white shadow-sm text-stone-800' : 'text-stone-400 hover:text-stone-600');
+      const admin = client.connectMode === 'admin';
+      dom.adminLoginWrap.classList.toggle('hidden', !admin);
+      dom.connectActionBtn.textContent = admin ? '🔐 Login & Create Session' : '🎮 Join Game';
+      dom.tabPlayer.className = 'flex-1 py-2 rounded-md text-sm font-semibold transition-all ' +
+        (admin ? 'text-stone-400 hover:text-stone-600' : 'bg-white shadow-sm text-stone-800');
+      dom.tabAdmin.className = 'flex-1 py-2 rounded-md text-sm font-semibold transition-all ' +
+        (admin ? 'bg-white shadow-sm text-stone-800' : 'text-stone-400 hover:text-stone-600');
     }
 
     // ================================================================
@@ -1466,28 +1474,29 @@
         e.target.value = '';
       });
 
-      dom.tabCreate.addEventListener('click', () => {
-        client.connectMode = 'create';
+      dom.tabPlayer.addEventListener('click', () => {
+        client.connectMode = 'player';
         applyMode();
       });
-      dom.tabJoin.addEventListener('click', () => {
-        client.connectMode = 'join';
+      dom.tabAdmin.addEventListener('click', () => {
+        client.connectMode = 'admin';
         applyMode();
       });
 
       dom.connectActionBtn.addEventListener('click', () => {
         const name = client.profile.name.trim() || 'Player';
-        if (client.connectMode === 'join') {
-          const code = dom.joinCodeInput.value.trim().toUpperCase();
-          if (!/^\d{4}$/.test(code)) {
-            showToast('Please enter the 4-digit session code (1011).');
+        if (client.connectMode === 'admin') {
+          const user = dom.adminUser.value.trim();
+          const pass = dom.adminPass.value;
+          if (user !== ADMIN_USER || pass !== ADMIN_PASS) {
+            showToast('Invalid admin credentials.');
             return;
           }
           clearSaved();
-          joinPeerSession(code, name, client.profile.avatar, null);
+          hostCreateSession(name, client.profile.avatar);
         } else {
           clearSaved();
-          hostCreateSession(name, client.profile.avatar);
+          joinPeerSession(FIXED_CODE, name, client.profile.avatar, null);
         }
       });
 
@@ -1545,12 +1554,11 @@
       // Default random avatar
       client.profile.avatar = { type: 'emoji', value: getRandomAvatar() };
 
-      // URL room param
+      // URL room param (still supported as an invite link; players no longer need to type the code)
       const params = new URLSearchParams(location.search);
       const room = params.get('room');
       if (room) {
-        client.connectMode = 'join';
-        dom.joinCodeInput.value = room.toUpperCase();
+        client.connectMode = 'player';
         applyMode();
       }
 
@@ -1568,8 +1576,7 @@
           if (saved.profile) client.profile = saved.profile;
           dom.profileName.value = client.profile.name === 'Player' ? '' : client.profile.name;
           updateAvatarPreview();
-          client.connectMode = 'join';
-          dom.joinCodeInput.value = saved.code;
+          client.connectMode = 'player';
           applyMode();
           joinPeerSession(saved.code, client.profile.name, client.profile.avatar, saved.playerId);
         }
