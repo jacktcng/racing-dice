@@ -58,24 +58,20 @@
     }
     .dice-shake { animation: diceShake 0.6s ease-in-out; }
 
-    .podium-1st { height: 120px; background: linear-gradient(180deg, #047857, #065F46); transform: rotateX(-5deg); transform-origin: bottom; }
-    .podium-2nd { height: 90px; background: linear-gradient(180deg, #E8E8E8, #B0B0B0); transform: rotateX(-5deg); transform-origin: bottom; }
-    .podium-3rd { height: 60px; background: linear-gradient(180deg, #BAE6FD, #38BDF8); transform: rotateX(-5deg); transform-origin: bottom; }
-
     .lane-track {
       background: repeating-linear-gradient(90deg,
-        rgba(186, 230, 253, 0.45) 0px,
-        rgba(186, 230, 253, 0.45) 40px,
-        rgba(125, 211, 252, 0.35) 40px,
-        rgba(125, 211, 252, 0.35) 80px
+        rgba(186, 230, 253, 0.95) 0px,
+        rgba(186, 230, 253, 0.95) 40px,
+        rgba(125, 211, 252, 0.9) 40px,
+        rgba(125, 211, 252, 0.9) 80px
       );
     }
     .lane-track:nth-child(even) {
       background: repeating-linear-gradient(90deg,
-        rgba(167, 243, 208, 0.35) 0px,
-        rgba(167, 243, 208, 0.35) 40px,
-        rgba(110, 231, 183, 0.25) 40px,
-        rgba(110, 231, 183, 0.25) 80px
+        rgba(167, 243, 208, 0.9) 0px,
+        rgba(167, 243, 208, 0.9) 40px,
+        rgba(110, 231, 183, 0.85) 40px,
+        rgba(110, 231, 183, 0.85) 80px
       );
     }
 
@@ -214,7 +210,7 @@
     }
   </script>
 </head>
-<body class="min-h-screen text-stone-800">
+<body class="min-h-screen text-neutral-950">
 
   <!-- Background Music — replace "bgm.mp3" with your MP3 filename -->
   <audio id="bgm" loop preload="auto" autoplay>
@@ -226,21 +222,21 @@
     <div class="w-full max-w-md bg-white/85 backdrop-blur-lg rounded-2xl p-8 elevated-card border border-white/50">
       <div class="text-center mb-2">
         <div class="text-5xl mb-2">🏇</div>
-        <h1 class="text-3xl font-bold font-serif text-stone-800">ShanShan & Jack's Wedding</h1>
-        <p class="text-stone-400 text-sm mt-0.5">賽馬骰子遊戲</p>
+        <h1 class="text-3xl font-bold font-serif text-neutral-950">ShanShan & Jack's Wedding</h1>
+        <p class="text-neutral-600 text-sm mt-0.5">賽馬骰子遊戲</p>
       </div>
       <div class="w-16 h-0.5 bg-gradient-to-r from-sky-400 to-green-600 mx-auto my-4 rounded-full"></div>
 
-      <label class="block text-xs font-semibold text-stone-500 mb-1">你的名字</label>
+      <label class="block text-xs font-semibold text-neutral-700 mb-1">你的名字</label>
       <input id="profile-name"
         type="text" maxlength="20" placeholder="輸入你的名字"
-        class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all mb-4" />
+        class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-neutral-950 placeholder-neutral-400 text-sm focus:outline-none focus:border-neutral-400/60 focus:ring-2 focus:ring-neutral-400/20 transition-all mb-4" />
 
-      <label class="block text-xs font-semibold text-stone-500 mb-1">你的頭像</label>
+      <label class="block text-xs font-semibold text-neutral-700 mb-1">你的頭像</label>
       <div class="flex items-center gap-2 mb-5">
         <div class="avatar-circle border border-white/40" id="avatar-preview"></div>
-        <button id="avatar-upload-btn" class="px-3 py-1.5 text-xs rounded-lg border border-white/40 text-stone-500 hover:border-sky-300 hover:text-sky-600 transition-colors">📷 上傳</button>
-        <button id="avatar-random-btn" class="px-3 py-1.5 text-xs rounded-lg border border-white/40 text-stone-500 hover:border-green-300 hover:text-green-600 transition-colors">🎲 隨機</button>
+        <button id="avatar-upload-btn" class="px-3 py-1.5 text-xs rounded-lg border border-white/40 text-neutral-700 hover:border-neutral-300 hover:text-neutral-600 transition-colors">📷 上傳</button>
+        <button id="avatar-random-btn" class="px-3 py-1.5 text-xs rounded-lg border border-white/40 text-neutral-700 hover:border-neutral-300 hover:text-neutral-600 transition-colors">🎲 隨機</button>
         <input type="file" accept="image/*" id="avatar-file-input" class="file-input-hidden" />
       </div>
 
@@ -251,12 +247,12 @@
       </div>
 
       <div id="admin-login-wrap" class="hidden mb-3">
-        <label class="block text-xs font-semibold text-stone-500 mb-1">管理員用戶名</label>
+        <label class="block text-xs font-semibold text-neutral-700 mb-1">管理員用戶名</label>
         <input id="admin-user" type="text" autocomplete="username" placeholder="輸入管理員用戶名"
-          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all mb-2" />
-        <label class="block text-xs font-semibold text-stone-500 mb-1">密碼</label>
+          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-neutral-950 placeholder-neutral-400 text-sm focus:outline-none focus:border-neutral-400/60 focus:ring-2 focus:ring-neutral-400/20 transition-all mb-2" />
+        <label class="block text-xs font-semibold text-neutral-700 mb-1">密碼</label>
         <input id="admin-pass" type="password" autocomplete="current-password" placeholder="輸入管理員密碼"
-          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-stone-800 placeholder-stone-400 text-sm focus:outline-none focus:border-sky-400/60 focus:ring-2 focus:ring-sky-400/20 transition-all" />
+          class="w-full bg-white/90 border border-white/40 rounded-lg px-3 py-2.5 text-neutral-950 placeholder-neutral-400 text-sm focus:outline-none focus:border-neutral-400/60 focus:ring-2 focus:ring-neutral-400/20 transition-all" />
       </div>
 
       <button id="connect-action-btn"
@@ -264,8 +260,8 @@
         🎮 加入遊戲
       </button>
 
-      <div class="mt-4 text-center text-xs text-stone-400 flex items-center justify-center gap-2">
-        <span id="conn-status" class="inline-flex items-center gap-1 conn-pill px-2 py-0.5 rounded-full bg-stone-100 text-stone-500">
+      <div class="mt-4 text-center text-xs text-neutral-600 flex items-center justify-center gap-2">
+        <span id="conn-status" class="inline-flex items-center gap-1 conn-pill px-2 py-0.5 rounded-full bg-neutral-100 text-neutral-700">
           <span class="w-1.5 h-1.5 rounded-full bg-stone-300 inline-block"></span> 就緒
         </span>
       </div>
@@ -277,18 +273,18 @@
     <div class="w-full max-w-md bg-white/85 backdrop-blur-lg rounded-2xl p-8 elevated-card border border-white/50">
       <div class="text-center mb-1">
         <div class="text-4xl mb-2">📋</div>
-        <h1 class="text-2xl font-bold font-serif text-stone-800">房間已就緒</h1>
+        <h1 class="text-2xl font-bold font-serif text-neutral-950">房間已就緒</h1>
       </div>
       <div class="w-16 h-0.5 bg-gradient-to-r from-sky-400 to-green-600 mx-auto my-3 rounded-full"></div>
 
-      <p class="text-center text-sm text-stone-500 mb-2">邀請好友 — 分享此房間碼：</p>
+      <p class="text-center text-sm text-neutral-700 mb-2">邀請好友 — 分享此房間碼：</p>
       <div class="text-center mb-3">
-        <span id="lobby-code" class="text-4xl font-bold tracking-[0.3em] text-sky-700 font-mono">------</span>
-        <button id="copy-code-btn" class="ml-2 px-2 py-1 text-xs rounded-lg border border-white/40 text-stone-500 hover:text-sky-600 hover:border-sky-300 transition-colors">複製</button>
+        <span id="lobby-code" class="text-4xl font-bold tracking-[0.3em] text-neutral-700 font-mono">------</span>
+        <button id="copy-code-btn" class="ml-2 px-2 py-1 text-xs rounded-lg border border-white/40 text-neutral-700 hover:text-neutral-600 hover:border-neutral-300 transition-colors">複製</button>
       </div>
 
       <div class="bg-white/70 rounded-xl border border-white/40 p-3 mb-4">
-        <h3 class="text-xs font-semibold text-stone-500 uppercase tracking-wider mb-2">玩家 (<span id="lobby-count">0</span>)</h3>
+        <h3 class="text-xs font-semibold text-neutral-700 uppercase tracking-wider mb-2">玩家 (<span id="lobby-count">0</span>)</h3>
         <div id="lobby-players" class="space-y-2">
           <!-- 由JS生成 -->
         </div>
@@ -299,7 +295,7 @@
         disabled>
         🏁 開始遊戲
       </button>
-      <p id="lobby-hint" class="text-center text-xs text-stone-400 mt-3">等待至少2位玩家加入…</p>
+      <p id="lobby-hint" class="text-center text-xs text-neutral-600 mt-3">等待至少2位玩家加入…</p>
     </div>
   </div>
 
@@ -309,29 +305,33 @@
       <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
           <button id="music-toggle" class="music-btn" title="背景音樂">🔇</button>
-          <div class="text-sm text-stone-400 font-medium">
-            第 <span id="round-display" class="text-stone-800 font-bold text-lg">1</span> 輪 <span class="text-stone-300">/ 5</span>
+          <div class="text-sm text-neutral-600 font-medium">
+            第 <span id="round-display" class="text-neutral-950 font-bold text-lg">1</span> 輪 <span class="text-neutral-400">/ 5</span>
           </div>
           <div class="hidden sm:block w-px h-6 bg-white/30"></div>
           <div id="turn-indicator" class="text-sm">
-            <span class="text-stone-400">你的骰子：</span>
-            <span id="current-player-name" class="font-semibold text-stone-800">—</span>
+            <span class="text-neutral-600">你的骰子：</span>
+            <span id="current-player-name" class="font-semibold text-neutral-950">—</span>
           </div>
-          <div class="hidden md:block text-xs text-stone-400 px-2 py-0.5 rounded-full bg-white/50">房間 <span id="room-code-mini">---</span></div>
+          <div class="hidden md:block text-xs text-neutral-600 px-2 py-0.5 rounded-full bg-white/50">房間 <span id="room-code-mini">---</span></div>
         </div>
 
         <div class="flex items-center gap-4">
           <div id="dice-display" class="flex items-center gap-3">
             <div id="dice-container" class="dice-face"></div>
-            <span id="dice-result" class="text-2xl font-bold text-green-700 w-8 text-center">?</span>
+            <span id="dice-result" class="text-2xl font-bold text-neutral-700 w-8 text-center">?</span>
           </div>
           <button id="roll-btn"
             class="px-6 py-2.5 rounded-xl font-bold text-base transition-all btn-3d disabled:opacity-40 disabled:cursor-not-allowed bg-gradient-to-r from-sky-600 to-sky-800 hover:from-sky-500 hover:to-sky-700 text-white">
             🎲 擲骰子
           </button>
+          <button id="end-game-btn"
+            class="hidden px-4 py-2.5 rounded-xl font-bold text-sm transition-all btn-3d bg-gradient-to-r from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white">
+            🏳 結束遊戲
+          </button>
         </div>
 
-        <button id="lb-toggle" class="lg:hidden text-stone-400 hover:text-stone-600 transition-colors text-sm">
+        <button id="lb-toggle" class="lg:hidden text-neutral-600 hover:text-neutral-800 transition-colors text-sm">
           📊 排行榜 <span id="lb-toggle-arrow">▼</span>
         </button>
       </div>
@@ -340,15 +340,15 @@
     <div class="flex-1 flex flex-col lg:flex-row max-w-7xl mx-auto w-full p-4 gap-4 overflow-hidden">
       <div id="racetrack-container" class="flex-1 min-w-0">
         <div class="flex items-center justify-between mb-2">
-          <h2 class="text-sm font-semibold text-stone-400 uppercase tracking-wider font-sans">🏁 賽道</h2>
+          <h2 class="text-sm font-semibold text-neutral-700 uppercase tracking-wider font-sans">🏁 賽道</h2>
         </div>
         <div id="lanes-container" class="space-y-2"></div>
       </div>
 
       <div id="leaderboard-container" class="lg:w-72 flex-shrink-0">
         <div id="leaderboard-header" class="flex items-center justify-between mb-2 cursor-pointer lg:cursor-default">
-          <h2 class="text-sm font-semibold text-stone-400 uppercase tracking-wider font-sans">🏆 排行榜</h2>
-          <span class="lg:hidden text-xs text-stone-300">點擊切換</span>
+          <h2 class="text-sm font-semibold text-neutral-700 uppercase tracking-wider font-sans">🏆 排行榜</h2>
+          <span class="lg:hidden text-xs text-neutral-500">點擊切換</span>
         </div>
         <div id="leaderboard-body" class="leaderboard-collapsible lg:!max-h-none bg-white/85 backdrop-blur-lg rounded-xl p-3 space-y-2 elevated-card border border-white/50"></div>
       </div>
@@ -358,11 +358,17 @@
       <div class="max-w-7xl mx-auto">
         <div class="flex items-center justify-between mb-3">
           <div>
-            <h3 class="text-lg font-bold font-serif text-stone-800">🔄 重擲階段</h3>
-            <p class="text-sm text-stone-500">每位玩家可以重擲<strong>一個</strong>骰子</p>
+            <h3 class="text-lg font-bold font-serif text-neutral-950">🔄 重擲階段</h3>
+            <p class="text-sm text-neutral-700">每位玩家可以重擲<strong>一個</strong>骰子</p>
           </div>
-          <div id="reroll-player-indicator" class="text-sm bg-white/85 px-3 py-1.5 rounded-lg font-semibold elevated-card">
-            狀態：<span id="reroll-player-name" class="text-sky-700">—</span>
+          <div class="flex items-center gap-3">
+            <div id="reroll-player-indicator" class="text-sm bg-white/85 px-3 py-1.5 rounded-lg font-semibold elevated-card">
+              狀態：<span id="reroll-player-name" class="text-neutral-700">—</span>
+            </div>
+            <button id="end-game-btn-reroll"
+              class="hidden px-4 py-2 rounded-xl font-bold text-sm transition-all btn-3d bg-gradient-to-r from-red-500 to-red-700 hover:from-red-400 hover:to-red-600 text-white">
+              🏳 結束遊戲
+            </button>
           </div>
         </div>
         <div id="reroll-content" class="space-y-3"></div>
@@ -376,12 +382,12 @@
     <canvas id="confetti-canvas"></canvas>
     <div class="relative z-10 w-full max-w-2xl text-center screen-enter">
       <div class="text-6xl mb-2">👑</div>
-      <h1 class="text-4xl md:text-5xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-r from-sky-500 via-green-600 to-green-700 mb-1">冠軍！</h1>
-      <p id="winner-name" class="text-xl text-stone-600 mb-8">—</p>
+      <h1 class="text-4xl md:text-5xl font-bold font-serif text-transparent bg-clip-text bg-gradient-to-r from-neutral-600 via-neutral-800 to-neutral-950 mb-1">冠軍！</h1>
+      <p id="winner-name" class="text-xl text-neutral-800 mb-2">—</p>
+
       <div class="w-24 h-0.5 bg-gradient-to-r from-sky-300 via-green-500 to-sky-300 mx-auto mb-8 rounded-full"></div>
-      <div id="podium" class="flex items-end justify-center gap-2 md:gap-4 mb-8"></div>
       <div class="max-w-md mx-auto mb-8">
-        <h3 class="text-sm font-semibold text-stone-400 uppercase tracking-wider mb-3 font-sans">🏅 最終排名</h3>
+        <h3 class="text-sm font-semibold text-neutral-700 uppercase tracking-wider mb-3 font-sans">🏅 最終排名</h3>
         <div id="final-standings" class="bg-white/85 backdrop-blur-lg rounded-xl p-3 space-y-2 elevated-card border border-white/50 text-left"></div>
       </div>
       <button id="play-again-btn"
@@ -502,9 +508,10 @@
       dom.lbBody = $('#leaderboard-body');
       dom.confettiCanvas = $('#confetti-canvas');
       dom.winnerName = $('#winner-name');
-      dom.podium = $('#podium');
       dom.finalStandings = $('#final-standings');
       dom.playAgainBtn = $('#play-again-btn');
+      dom.endGameBtn = $('#end-game-btn');
+      dom.endGameBtnReroll = $('#end-game-btn-reroll');
       dom.roomCodeMini = $('#room-code-mini');
       dom.toast = $('#toast');
       dom.bgm = $('#bgm');
@@ -728,6 +735,7 @@
         case 'reroll':      hostReroll(conn, msg); break;
         case 'rerollSkip':  hostRerollSkip(conn); break;
         case 'playAgain':   hostPlayAgain(conn); break;
+        case 'endGame':     hostEndGame(conn); break;
         case 'leaveSession': hostLeave(conn); break;
       }
     }
@@ -873,6 +881,17 @@
       s.currentRound = 1;
       s.currentPlayerIndex = 0;
       s.rerollPlayerIndex = 0;
+      s.endedEarly = false;
+      hostSyncState();
+    }
+
+    function hostEndGame(conn) {
+      const s = host.session;
+      if (!s) return;
+      if (hostSenderId(conn) !== s.hostId) return;
+      if (s.phase !== 'racing' && s.phase !== 'reroll') return;
+      s.endedEarly = true;
+      s.phase = 'victory';
       hostSyncState();
     }
 
@@ -1066,6 +1085,11 @@
 
       if (dom.roomCodeMini) dom.roomCodeMini.textContent = session.code;
 
+      const isHost = client.myId === session.hostId;
+      const showEndBtn = isHost && (session.phase === 'racing' || session.phase === 'reroll');
+      dom.endGameBtn.classList.toggle('hidden', !showEndBtn);
+      dom.endGameBtnReroll.classList.toggle('hidden', !showEndBtn);
+
       if (session.phase === 'lobby') {
         showScreen('lobby');
         renderLobby();
@@ -1138,9 +1162,9 @@
       dom.adminLoginWrap.classList.toggle('hidden', !admin);
       dom.connectActionBtn.textContent = admin ? '🔐 登入並創建房間' : '🎮 加入遊戲';
       dom.tabPlayer.className = 'flex-1 py-2 rounded-md text-sm font-semibold transition-all ' +
-        (admin ? 'text-stone-400 hover:text-stone-600' : 'bg-white shadow-sm text-stone-800');
+        (admin ? 'text-neutral-600 hover:text-neutral-800' : 'bg-white shadow-sm text-neutral-950');
       dom.tabAdmin.className = 'flex-1 py-2 rounded-md text-sm font-semibold transition-all ' +
-        (admin ? 'bg-white shadow-sm text-stone-800' : 'text-stone-400 hover:text-stone-600');
+        (admin ? 'bg-white shadow-sm text-neutral-950' : 'text-neutral-600 hover:text-neutral-800');
     }
 
     // ================================================================
@@ -1157,16 +1181,16 @@
       s.players.forEach((p, i) => {
         const color = getPlayerColor(i);
         const dot = p.connected
-          ? '<span class="w-2 h-2 rounded-full bg-green-500 inline-block"></span>'
+          ? '<span class="w-2 h-2 rounded-full bg-neutral-1000 inline-block"></span>'
           : '<span class="w-2 h-2 rounded-full bg-stone-300 inline-block"></span>';
-        const isYou = p.id === client.myId ? ' <span class="text-xs text-sky-600 font-semibold">(你)</span>' : '';
+        const isYou = p.id === client.myId ? ' <span class="text-xs text-neutral-600 font-semibold">(你)</span>' : '';
         const el = document.createElement('div');
         el.className = 'flex items-center gap-2 py-1.5 px-2 rounded-lg border border-white/30 bg-white/50';
         el.innerHTML = `
           <span>${dot}</span>
           <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color.hex}"></div>
           ${avatarHtml(p, 'sm')}
-          <span class="text-sm flex-1 truncate text-stone-700">${p.name}</span>${isYou}
+          <span class="text-sm flex-1 truncate text-neutral-800">${p.name}</span>${isYou}
         `;
         dom.lobbyPlayers.appendChild(el);
       });
@@ -1226,14 +1250,14 @@
         const lane = document.createElement('div');
         lane.className = 'lane relative rounded-lg overflow-hidden elevated-card border border-white/40' +
           (isMe ? ' ring-2 ring-sky-400/50' : '');
-        lane.style.background = `linear-gradient(90deg, ${color.pale}ee, white 30%, ${color.pale}99 70%)`;
+        lane.style.background = `linear-gradient(90deg, ${color.pale}f5, white 30%, ${color.pale}f0 70%)`;
         lane.dataset.playerIndex = p.origIndex;
 
         lane.innerHTML = `
           <div class="flex items-stretch h-28 min-h-[112px]">
             <div class="flex items-center gap-2 px-3 min-w-[110px] sm:min-w-[140px] flex-shrink-0 border-r border-white/30 bg-white/70" style="border-left: 3px solid ${color.hex}">
               <div class="w-3 h-3 rounded-full flex-shrink-0 elevated-card" style="background:${color.hex}"></div>
-              <span class="text-sm font-semibold text-stone-700 truncate">${p.name}${isMe ? ' <span class="text-xs text-sky-600">(你)</span>' : ''}</span>
+              <span class="text-sm font-semibold text-neutral-800 truncate">${p.name}${isMe ? ' <span class="text-xs text-neutral-600">(你)</span>' : ''}</span>
             </div>
             <div class="relative flex-1 lane-track">
               <div class="horse absolute top-1/2 -translate-y-1/2 z-10 select-none" style="left:${Math.max(1, Math.min(99, pct))}%;">
@@ -1244,7 +1268,7 @@
               </div>
               <div class="finish-line absolute right-0 top-0 h-full w-3"></div>
               <div class="absolute inset-0 flex items-center px-3">
-                <div class="text-xs text-stone-400/60 ml-auto mr-5">${Math.round(pct)}%</div>
+                <div class="text-xs text-neutral-600/70 ml-auto mr-5">${Math.round(pct)}%</div>
               </div>
             </div>
           </div>
@@ -1290,7 +1314,7 @@
       const ranked = getRankedPlayers();
       body.innerHTML = '';
       if (ranked.length === 0) {
-        body.innerHTML = '<div class="text-sm text-stone-400 text-center py-4">暫無玩家</div>';
+        body.innerHTML = '<div class="text-sm text-neutral-600 text-center py-4">暫無玩家</div>';
         return;
       }
       ranked.forEach(({ player, rankLabel }, idx) => {
@@ -1300,14 +1324,14 @@
         const medal = idx < 3 ? medals[idx] : '';
         const entry = document.createElement('div');
         entry.className = 'flex items-center gap-2 py-1.5 px-2 rounded-lg ' +
-          (idx === 0 ? 'bg-sky-50/80 border border-sky-200/60' : 'border border-white/20 bg-white/60');
+          (idx === 0 ? 'bg-emerald-50/80 border border-neutral-200/60' : 'border border-white/20 bg-white/60');
         entry.innerHTML = `
-          <span class="text-xs font-mono w-8 text-stone-400 flex-shrink-0 font-medium">${rankLabel}</span>
+          <span class="text-xs font-mono w-8 text-neutral-600 flex-shrink-0 font-medium">${rankLabel}</span>
           <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color.hex}"></div>
           ${avatarHtml(player, 'sm')}
-          <span class="text-sm flex-1 truncate text-stone-700">${player.name}</span>
+          <span class="text-sm flex-1 truncate text-neutral-800">${player.name}</span>
           <span class="text-xs">${medal}</span>
-          <span class="text-sm font-bold text-stone-800">${player.totalScore}</span>
+          <span class="text-sm font-bold text-neutral-950">${player.totalScore}</span>
         `;
         body.appendChild(entry);
       });
@@ -1336,8 +1360,8 @@
         pDiv.innerHTML = `
           <div class="flex items-center gap-2 mb-2">
             <div class="w-3 h-3 rounded-full" style="background:${color.hex}"></div>
-            <span class="font-semibold text-sm text-stone-700">${p.name}${isMe ? ' <span class="text-xs text-sky-600">(你)</span>' : ''}</span>
-            <span class="text-xs text-stone-400 ml-auto">總分：<strong class="text-stone-800">${p.totalScore}</strong></span>
+            <span class="font-semibold text-sm text-neutral-800">${p.name}${isMe ? ' <span class="text-xs text-neutral-600">(你)</span>' : ''}</span>
+            <span class="text-xs text-neutral-600 ml-auto">總分：<strong class="text-neutral-950">${p.totalScore}</strong></span>
           </div>
           <div class="flex flex-wrap gap-2" data-player="${pi}">
             ${[0,1,2,3,4].map((ri) => {
@@ -1347,13 +1371,13 @@
               return `
                 <div class="reroll-slot flex flex-col items-center gap-3 p-5 rounded-xl ${rerolled ? 'rerolled bg-emerald-50/80 border border-emerald-200' : 'bg-white/80 border border-white/30'} ${canClick ? 'cursor-pointer hover:border-sky-300 hover:bg-sky-50/50' : ''}" data-player="${pi}" data-round="${ri}">
                   <span class="text-7xl leading-none">${val ? diceChar(val) : '?'}</span>
-                  <span class="text-sm text-stone-400">R${ri + 1}</span>
-                  ${rerolled ? '<span class="text-xs text-emerald-600 font-semibold">✓ 已重擲</span>' : ''}
-                  ${p.rerollUsed && !rerolled ? '<span class="text-xs text-stone-300">—</span>' : ''}
+                  <span class="text-sm text-neutral-600">R${ri + 1}</span>
+                  ${rerolled ? '<span class="text-xs text-neutral-600 font-semibold">✓ 已重擲</span>' : ''}
+                  ${p.rerollUsed && !rerolled ? '<span class="text-xs text-neutral-400">—</span>' : ''}
                 </div>
               `;
             }).join('')}
-            ${isMe && !p.rerollUsed ? '<button class="reroll-skip-btn ml-2 px-3 py-1 text-xs rounded-lg border border-white/30 text-stone-500 hover:text-stone-700 hover:border-white/50 transition-colors self-center">跳過</button>' : ''}
+            ${isMe && !p.rerollUsed ? '<button class="reroll-skip-btn ml-2 px-3 py-1 text-xs rounded-lg border border-white/30 text-neutral-700 hover:text-neutral-900 hover:border-white/50 transition-colors self-center">跳過</button>' : ''}
           </div>
         `;
         container.appendChild(pDiv);
@@ -1383,40 +1407,6 @@
         dom.winnerName.style.color = getPlayerColor(S().players.indexOf(winner)).hex;
       }
 
-      const podium = dom.podium;
-      podium.innerHTML = '';
-      const top3 = ranked.slice(0, 3);
-      const order = top3.length === 3 ? [top3[1], top3[0], top3[2]]
-        : top3.length === 2 ? [top3[1], top3[0]]
-        : top3.length === 1 ? [top3[0]]
-        : [];
-
-      order.forEach(({ player, rankLabel }, i) => {
-        const pi = S().players.indexOf(player);
-        const color = getPlayerColor(pi);
-        const isFirstIn3 = order.length === 3 && i === 1;
-        const crown = isFirstIn3 ? '👑' : '';
-        const medal = i === 0 && order.length === 3 ? '🥈' : isFirstIn3 ? '🥇' : i === 2 ? '🥉' : '';
-        const heightClass = i === 0 && order.length === 3 ? 'podium-2nd'
-          : isFirstIn3 ? 'podium-1st'
-          : i === 2 ? 'podium-3rd'
-          : 'podium-1st';
-        const podiumItem = document.createElement('div');
-        podiumItem.className = 'flex flex-col items-center gap-1 float-3d';
-        podiumItem.innerHTML = `
-          ${crown ? `<div class="text-2xl crown-bounce">${crown}</div>` : ''}
-          <div class="w-16 md:w-20 ${heightClass} rounded-t-lg flex items-center justify-center text-xl font-bold text-white/80">${pi + 1}</div>
-          <div class="flex items-center gap-1 mt-1">
-            <div class="w-2.5 h-2.5 rounded-full" style="background:${color.hex}"></div>
-            ${avatarHtml(player, 'lg')}
-            <span class="text-xs font-semibold text-stone-700 truncate max-w-[80px]">${player.name}</span>
-          </div>
-          <span class="text-sm font-bold text-stone-800">${player.totalScore}</span>
-          <span class="text-xs text-stone-400">${rankLabel}</span>
-        `;
-        podium.appendChild(podiumItem);
-      });
-
       const standings = dom.finalStandings;
       standings.innerHTML = '';
       ranked.forEach(({ player, rankLabel }, idx) => {
@@ -1428,12 +1418,12 @@
         entry.className = 'flex items-center gap-2 py-1.5 px-2 rounded-lg ' +
           (idx === 0 ? 'bg-sky-50/80 border border-sky-200/60' : 'border border-white/20 bg-white/60');
         entry.innerHTML = `
-          <span class="text-xs font-mono w-8 text-stone-400 flex-shrink-0 font-medium">${rankLabel}</span>
+          <span class="text-xs font-mono w-8 text-neutral-600 flex-shrink-0 font-medium">${rankLabel}</span>
           <div class="w-2.5 h-2.5 rounded-full flex-shrink-0" style="background:${color.hex}"></div>
           ${avatarHtml(player, 'sm')}
-          <span class="text-sm flex-1 truncate text-stone-700">${player.name}</span>
+          <span class="text-sm flex-1 truncate text-neutral-800">${player.name}</span>
           <span class="text-xs">${medal}</span>
-          <span class="text-sm font-bold text-stone-800">${player.totalScore}</span>
+          <span class="text-sm font-bold text-neutral-950">${player.totalScore}</span>
         `;
         standings.appendChild(entry);
       });
@@ -1482,8 +1472,8 @@
           slot.classList.add('rerolled');
           slot.innerHTML = `
             <span class="text-7xl leading-none">${diceChar(value)}</span>
-            <span class="text-sm text-stone-400">R${roundIndex + 1}</span>
-            <span class="text-xs text-emerald-600 font-semibold">✓ 已重擲</span>
+            <span class="text-sm text-neutral-600">R${roundIndex + 1}</span>
+            <span class="text-xs text-neutral-600 font-semibold">✓ 已重擲</span>
           `;
           // Re-sort lanes after reroll
           updateHorsePositions();
@@ -1568,7 +1558,7 @@
     function setConnStatus(ok, label) {
       const dot = dom.connStatus.querySelector('span');
       if (ok) {
-        dot.className = 'w-1.5 h-1.5 rounded-full bg-green-500 inline-block';
+        dot.className = 'w-1.5 h-1.5 rounded-full bg-neutral-1000 inline-block';
         dom.connStatus.childNodes[dom.connStatus.childNodes.length - 1].textContent = ' 已連接';
       } else if (label === 'offline') {
         dot.className = 'w-1.5 h-1.5 rounded-full bg-stone-300 inline-block';
@@ -1648,6 +1638,13 @@
           dom.rollBtn.disabled = true;
           send({ type: 'rollDie' });
         }
+      });
+
+      dom.endGameBtn.addEventListener('click', () => {
+        if (confirm('確定要提前結束遊戲嗎？')) send({ type: 'endGame' });
+      });
+      dom.endGameBtnReroll.addEventListener('click', () => {
+        if (confirm('確定要提前結束遊戲嗎？')) send({ type: 'endGame' });
       });
 
       dom.lbHeader.addEventListener('click', () => {
