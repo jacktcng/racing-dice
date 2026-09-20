@@ -1351,7 +1351,12 @@
       const remaining = s.players.filter(p => !p.rerollUsed).length;
       dom.rerollPlayerName.textContent = remaining === 0 ? '全部完成' : `${remaining} 位等待中`;
 
-      s.players.forEach((p, pi) => {
+      const myIndex = s.players.findIndex(p => p.id === client.myId);
+      const ordered = myIndex >= 0
+        ? [s.players[myIndex], ...s.players.filter((_, i) => i !== myIndex)]
+        : s.players;
+      ordered.forEach((p, idx) => {
+        const pi = s.players.indexOf(p);
         const color = getPlayerColor(pi);
         const isMe = p.id === client.myId;
         const pDiv = document.createElement('div');
