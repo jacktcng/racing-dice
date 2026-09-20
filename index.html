@@ -1364,7 +1364,7 @@
             <span class="text-xs text-neutral-600 ml-auto">總分：<strong class="text-neutral-950">${p.totalScore}</strong></span>
           </div>
           <div class="flex flex-wrap gap-2" data-player="${pi}">
-            ${[0,1,2,3,4].map((ri) => {
+            ${Array.from({length: TOTAL_ROUNDS}, (_, ri) => {
               const val = p.diceValues[ri] || 0;
               const rerolled = p.rerolledIndex === ri;
               const canClick = isMe && !p.rerollUsed && !rerolled && !!val;
